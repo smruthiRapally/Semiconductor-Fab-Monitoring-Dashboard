@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageHero from '../components/PageHero'
+const HERO_IMG = 'https://images.unsplash.com/photo-1601128533718-374ffcca299b?w=1200&q=80&fit=crop'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line,
@@ -10,9 +12,9 @@ import {
 import { revenueData, revenueByCustomer, costBreakdown } from '../data/mockData'
 
 function formatINR(val) {
-  if (val >= 10000000) return `₹${(val/10000000).toFixed(2)}Cr`
-  if (val >= 100000)   return `₹${(val/100000).toFixed(1)}L`
-  return `₹${val.toLocaleString('en-IN')}`
+  if (val >= 10000000) return `â‚¹${(val/10000000).toFixed(2)}Cr`
+  if (val >= 100000)   return `â‚¹${(val/100000).toFixed(1)}L`
+  return `â‚¹${val.toLocaleString('en-IN')}`
 }
 
 const FabTooltip = ({ active, payload, label }) => {
@@ -44,6 +46,8 @@ export default function Revenue() {
 
   return (
     <div className="space-y-5">
+      <PageHero src={HERO_IMG} badge="Financial Analytics · P&L" title="Revenue & Profit Analytics" sub="Manufacturing cost, selling price, revenue trends, profit margins and customer financials." />
+
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -52,7 +56,7 @@ export default function Revenue() {
           </h1>
           <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
             <Radio size={10} className="text-green-400 live-dot"/>
-            Financial performance · Manufacturing cost vs selling price
+            Financial performance Â· Manufacturing cost vs selling price
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -66,7 +70,7 @@ export default function Revenue() {
         {[
           { l:'Total Revenue (YTD)', v:formatINR(totalRevenue),   c:'#10b981', glow:'rgba(16,185,129,0.3)', icon:IndianRupee, sub:`+${revenueGrowth}% last month` },
           { l:'Total Profit (YTD)',  v:formatINR(totalProfit),    c:'#4ade80', glow:'rgba(74,222,128,0.3)', icon:TrendingUp,  sub:`${avgMargin}% avg margin` },
-          { l:'Mfg Cost (Jun)',      v:formatINR(latest.cost),    c:'#f87171', glow:'rgba(248,113,113,0.3)',icon:Package,     sub:`₹${costPerWafer.toLocaleString()}/wafer` },
+          { l:'Mfg Cost (Jun)',      v:formatINR(latest.cost),    c:'#f87171', glow:'rgba(248,113,113,0.3)',icon:Package,     sub:`â‚¹${costPerWafer.toLocaleString()}/wafer` },
           { l:'Profit Margin (Jun)', v:`${Math.round((latest.profit/latest.revenue)*100)}%`, c:'#fbbf24', glow:'rgba(251,191,36,0.3)', icon:Target, sub:`+${profitGrowth}% vs May` },
         ].map((s,i) => {
           const Icon = s.icon
@@ -98,7 +102,7 @@ export default function Revenue() {
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               <IndianRupee size={14} className="text-green-400"/>Revenue vs Manufacturing Cost vs Profit
             </h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Jan – Jun 2024 · All values in INR</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Jan â€“ Jun 2024 Â· All values in INR</p>
           </div>
           <div className="flex gap-1.5">
             {[['monthly','Monthly']].map(([k,l]) => (
@@ -211,7 +215,7 @@ export default function Revenue() {
       <div className="glass rounded-2xl overflow-hidden anim-fade-up" style={{ animationDelay:'200ms' }}>
         <div className="px-5 py-4" style={{ borderBottom:'1px solid rgba(59,130,246,0.1)' }}>
           <h2 className="text-sm font-bold text-white">Monthly P&amp;L Statement</h2>
-          <p className="text-[10px] text-slate-500 mt-0.5">Revenue · Manufacturing Cost · Profit · Margin · Wafers</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">Revenue Â· Manufacturing Cost Â· Profit Â· Margin Â· Wafers</p>
         </div>
 
         {/* Mobile view */}
@@ -297,3 +301,5 @@ export default function Revenue() {
     </div>
   )
 }
+
+

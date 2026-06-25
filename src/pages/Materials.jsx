@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageHero from '../components/PageHero'
+const HERO_IMG = 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80&fit=crop'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -23,9 +25,9 @@ const STATUS_CFG = {
 }
 
 function formatINR(val) {
-  if (val >= 10000000) return `₹${(val/10000000).toFixed(2)}Cr`
-  if (val >= 100000)   return `₹${(val/100000).toFixed(1)}L`
-  return `₹${val.toLocaleString('en-IN')}`
+  if (val >= 10000000) return `â‚¹${(val/10000000).toFixed(2)}Cr`
+  if (val >= 100000)   return `â‚¹${(val/100000).toFixed(1)}L`
+  return `â‚¹${val.toLocaleString('en-IN')}`
 }
 
 const FabTooltip = ({ active, payload, label }) => {
@@ -67,6 +69,8 @@ export default function Materials() {
 
   return (
     <div className="space-y-5">
+      <PageHero src={HERO_IMG} badge="Inventory & Cost · Live" title="Materials & Cost Management" sub="Raw material inventory, cost tracking, supplier details and reorder status." />
+
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -182,7 +186,7 @@ export default function Materials() {
           style={{ borderBottom:'1px solid rgba(59,130,246,0.1)' }}>
           <div>
             <h2 className="text-sm font-bold text-white">Material Inventory</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">{filtered.length} items · Complete cost &amp; supplier view</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{filtered.length} items Â· Complete cost &amp; supplier view</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {/* Search */}
@@ -190,7 +194,7 @@ export default function Materials() {
               style={{ background:'rgba(15,23,42,0.7)', border:'1px solid rgba(59,130,246,0.15)' }}>
               <Search size={11} className="text-slate-500"/>
               <input value={search} onChange={e=>setSearch(e.target.value)}
-                placeholder="Search material or supplier…"
+                placeholder="Search material or supplierâ€¦"
                 className="bg-transparent text-[10px] text-slate-300 outline-none w-36 placeholder-slate-600"/>
             </div>
             {/* Category filter */}
@@ -240,7 +244,7 @@ export default function Materials() {
                 <div className="flex items-center gap-1.5">
                   <Globe size={10} className="text-slate-500"/>
                   <span className="text-[10px] text-slate-400">{m.supplier}</span>
-                  <span className="text-[9px] text-slate-600">· {m.supplierCountry}</span>
+                  <span className="text-[9px] text-slate-600">Â· {m.supplierCountry}</span>
                 </div>
               </div>
             )
@@ -321,3 +325,5 @@ export default function Materials() {
     </div>
   )
 }
+
+

@@ -1,24 +1,26 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageHero from '../components/PageHero'
+const HERO_IMG = 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=1200&q=80&fit=crop'
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  AreaChart, Area,
 } from 'recharts'
 import {
   AlertTriangle, TrendingUp, TrendingDown, Minus,
   ShieldCheck, Radio, Zap, Microscope, Activity,
-  Layers, Target, ArrowUpRight, ArrowDownRight,
+  Layers, Target,
 } from 'lucide-react'
 import { defectDistribution, defectTable, defectSummaryCards } from '../data/mockData'
 
-const COLORS = { High:'#f87171', Medium:'#fbbf24', Low:'#4ade80' }
+const SEV_COLORS = { High:'#dc2626', Medium:'#d97706', Low:'#16a34a' }
+const SEV_BG     = { High:'#fef2f2', Medium:'#fffbeb', Low:'#f0fdf4' }
+const SEV_BORDER = { High:'#fecaca', Medium:'#fde68a', Low:'#bbf7d0' }
 const TREND_ICON = {
-  up:     <TrendingUp  size={12} className="text-red-400"/>,
-  down:   <TrendingDown size={12} className="text-green-400"/>,
-  stable: <Minus size={12} className="text-slate-500"/>,
+  up:     <TrendingUp  size={12} className="text-red-500"/>,
+  down:   <TrendingDown size={12} className="text-green-600"/>,
+  stable: <Minus size={12} className="text-slate-400"/>,
 }
 
-/* ── Process-stage defect distribution (replaces Defect Profile) ── */
 const stageDefects = [
   { stage:'Lithography', particle:52, pattern:38, alignment:18, contamination:12 },
   { stage:'Etching',     particle:28, pattern:44, alignment:14, contamination:8  },
@@ -28,27 +30,24 @@ const stageDefects = [
   { stage:'CMP',         particle:8,  pattern:0,  alignment:0,  contamination:0  },
 ]
 
-/* ── Root Cause Analysis (replaces 5-Day Trend) ── */
 const rootCauses = [
-  { cause:'Photoresist Outgassing', defects:62, process:'Lithography', risk:'High',  cost:186000, icon:'🧪', mitigation:'Increase bake temp to 130°C, check resist shelf life' },
-  { cause:'Plasma Non-Uniformity',  defects:44, process:'Etching',     risk:'High',  cost:132000, icon:'⚡', mitigation:'Recalibrate RF power distribution, clean chamber walls' },
-  { cause:'Particle Contamination', defects:38, process:'Clean Room',  risk:'High',  cost:114000, icon:'🔬', mitigation:'Upgrade HEPA filters, enforce stricter gowning protocol' },
-  { cause:'Wafer Chuck Vibration',  defects:24, process:'Lithography', risk:'Medium',cost:72000,  icon:'📡', mitigation:'Anti-vibration mounts, predictive maintenance schedule' },
-  { cause:'CVD Precursor Impurity', defects:18, process:'Deposition',  risk:'Medium',cost:54000,  icon:'⚗️', mitigation:'Replace precursor batch, increase purity spec to 99.999%' },
-  { cause:'Gate Oxide Pinhole',     defects:14, process:'Oxidation',   risk:'Medium',cost:42000,  icon:'🔷', mitigation:'Controlled O₂ partial pressure, post-anneal N₂ treatment' },
-  { cause:'Metal Hillock Growth',   defects:10, process:'Metallization',risk:'Low',  cost:30000,  icon:'🔩', mitigation:'Lower deposition temp, add Ti adhesion layer' },
-  { cause:'CMP Slurry Agglomeration',defects:8, process:'CMP',        risk:'Low',   cost:24000,  icon:'⚙️', mitigation:'Increase slurry refresh rate, optimize down-force' },
+  { cause:'Photoresist Outgassing', defects:62, process:'Lithography',  risk:'High',   cost:186000, icon:'ðŸ§ª', mitigation:'Increase bake temp to 130Â°C, check resist shelf life' },
+  { cause:'Plasma Non-Uniformity',  defects:44, process:'Etching',      risk:'High',   cost:132000, icon:'âš¡', mitigation:'Recalibrate RF power distribution, clean chamber walls' },
+  { cause:'Particle Contamination', defects:38, process:'Clean Room',   risk:'High',   cost:114000, icon:'ðŸ”¬', mitigation:'Upgrade HEPA filters, enforce stricter gowning protocol' },
+  { cause:'Wafer Chuck Vibration',  defects:24, process:'Lithography',  risk:'Medium', cost:72000,  icon:'ðŸ“¡', mitigation:'Anti-vibration mounts, predictive maintenance schedule' },
+  { cause:'CVD Precursor Impurity', defects:18, process:'Deposition',   risk:'Medium', cost:54000,  icon:'âš—ï¸', mitigation:'Replace precursor batch, increase purity spec to 99.999%' },
+  { cause:'Gate Oxide Pinhole',     defects:14, process:'Oxidation',    risk:'Medium', cost:42000,  icon:'ðŸ”·', mitigation:'Controlled Oâ‚‚ partial pressure, post-anneal Nâ‚‚ treatment' },
+  { cause:'Metal Hillock Growth',   defects:10, process:'Metallization',risk:'Low',    cost:30000,  icon:'ðŸ”©', mitigation:'Lower deposition temp, add Ti adhesion layer' },
+  { cause:'CMP Slurry Agglomeration',defects:8, process:'CMP',         risk:'Low',    cost:24000,  icon:'âš™ï¸', mitigation:'Increase slurry refresh rate, optimize down-force' },
 ]
 
-/* ── Defect density by wafer zone ── */
 const zoneData = [
-  { zone:'Center',      density:0.012, good:94, defect:6  },
-  { zone:'Mid-radius',  density:0.019, good:91, defect:9  },
-  { zone:'Edge (5mm)',  density:0.048, good:78, defect:22 },
-  { zone:'Notch Area',  density:0.031, good:84, defect:16 },
+  { zone:'Center',    density:0.012, good:94, defect:6  },
+  { zone:'Mid-radius',density:0.019, good:91, defect:9  },
+  { zone:'Edge (5mm)',density:0.048, good:78, defect:22 },
+  { zone:'Notch Area',density:0.031, good:84, defect:16 },
 ]
 
-/* ── Escape rate by inspection step ── */
 const inspectionEscape = [
   { step:'After Litho', captured:88, escaped:12 },
   { step:'After Etch',  captured:79, escaped:21 },
@@ -58,23 +57,23 @@ const inspectionEscape = [
 ]
 
 const RISK_CFG = {
-  High:   { color:'#f87171', bg:'rgba(248,113,113,0.1)', border:'rgba(248,113,113,0.3)' },
-  Medium: { color:'#fbbf24', bg:'rgba(251,191,36,0.1)',  border:'rgba(251,191,36,0.3)'  },
-  Low:    { color:'#4ade80', bg:'rgba(74,222,128,0.1)',   border:'rgba(74,222,128,0.3)'  },
+  High:   { color:'#dc2626', bg:'#fef2f2', border:'#fecaca' },
+  Medium: { color:'#d97706', bg:'#fffbeb', border:'#fde68a' },
+  Low:    { color:'#16a34a', bg:'#f0fdf4', border:'#bbf7d0' },
 }
 
-function formatINR(val) {
-  if (val >= 100000) return `₹${(val/100000).toFixed(1)}L`
-  return `₹${val.toLocaleString('en-IN')}`
+function fmtINR(v) {
+  if (v >= 100000) return `â‚¹${(v/100000).toFixed(1)}L`
+  return `â‚¹${v.toLocaleString('en-IN')}`
 }
 
-const FabTooltip = ({ active, payload, label }) => {
+const ChartTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass rounded-lg px-3 py-2" style={{ border:'1px solid rgba(59,130,246,0.3)' }}>
+    <div className="bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2">
       <p className="text-[10px] text-slate-500 mb-1">{label}</p>
       {payload.map(p => (
-        <p key={p.name} className="text-xs font-bold" style={{ color:p.color||'#60a5fa' }}>
+        <p key={p.name} className="text-xs font-bold" style={{ color:p.color||'#2563eb' }}>
           {p.name}: {p.value}
         </p>
       ))}
@@ -88,25 +87,23 @@ function DefectRing({ data }) {
       <ResponsiveContainer width="100%" height={180}>
         <PieChart>
           <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={78}
-            paddingAngle={4} dataKey="value" strokeWidth={0} startAngle={90} endAngle={450}>
-            {data.map((d, i) => (
-              <Cell key={i} fill={d.color} style={{ filter:`drop-shadow(0 0 8px ${d.color}60)`, cursor:'pointer' }}/>
-            ))}
+            paddingAngle={4} dataKey="value" strokeWidth={2} stroke="#fff" startAngle={90} endAngle={450}>
+            {data.map((d, i) => <Cell key={i} fill={d.color} style={{ cursor:'pointer' }}/>)}
           </Pie>
           <Tooltip content={({ active, payload }) => {
             if (!active||!payload?.length) return null
             const d = payload[0]
             return (
-              <div className="glass rounded-lg px-3 py-2" style={{ border:`1px solid ${d.payload.color}40` }}>
+              <div className="bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2">
                 <p className="text-xs font-bold" style={{ color:d.payload.color }}>{d.name}</p>
-                <p className="text-sm font-black text-white">{d.value}%</p>
+                <p className="text-sm font-bold text-slate-800">{d.value}%</p>
               </div>
             )
           }}/>
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <p className="text-2xl font-black text-white">356</p>
+        <p className="text-2xl font-bold text-slate-800">356</p>
         <p className="text-[9px] text-slate-500 uppercase tracking-widest">Total</p>
       </div>
     </div>
@@ -118,41 +115,49 @@ export default function DefectAnalysis() {
 
   return (
     <div className="space-y-5">
+      <PageHero src={HERO_IMG} badge="Defect Intelligence · RCA" title="Defect Analysis" sub="Defect classification, root cause analysis, and process stage insights." />
+
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-black text-white tracking-tight">
-            <span className="gradient-text-cyan">Defect</span> Analysis
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1 h-6 rounded-full bg-red-500"/>
+            <p className="section-label text-red-600">Defect Intelligence</p>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily:"'Space Grotesk',sans-serif" }}>
+            Defect Analysis
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-            <Radio size={10} className="text-green-400 live-dot"/>
-            Defect classification · Root cause · Process stage insights
+          <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 live-dot inline-block"/>
+            Defect classification Â· Root cause Â· Process stage insights
           </p>
         </div>
         <div className="flex gap-2">
-          <div className="fab-badge badge-red"><AlertTriangle size={9}/>38 CRITICAL</div>
-          <div className="fab-badge badge-amber"><Zap size={9}/>ROOT CAUSE ACTIVE</div>
+          <span className="badge badge-red"><AlertTriangle size={10}/>38 Critical</span>
+          <span className="badge badge-amber"><Zap size={10}/>RCA Active</span>
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Summary KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {defectSummaryCards.map((c, i) => {
           const isPos = c.changeType === 'positive'
-          const accent = i===0?'#f87171':i===1?'#fbbf24':i===2?'#f87171':'#4ade80'
+          const colors = [['#dc2626','#fef2f2'],['#d97706','#fffbeb'],['#dc2626','#fef2f2'],['#16a34a','#f0fdf4']]
+          const [ac, bg] = colors[i]
           return (
-            <div key={c.label} className="glass rounded-2xl p-4 relative overflow-hidden stat-card-fab anim-fade-up"
-              style={{ animationDelay:`${i*70}ms`, border:`1px solid ${accent}20` }}>
-              <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background:`linear-gradient(90deg,transparent,${accent},transparent)` }}/>
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-2">{c.label}</p>
-              <p className="text-2xl font-black" style={{ color:accent }}>
+            <div key={c.label} className="stat-card card-lift anim-fade-up"
+              style={{ animationDelay:`${i*70}ms`, borderTop:`3px solid ${ac}` }}>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium mb-2">{c.label}</p>
+              <p className="text-2xl font-bold" style={{ color:ac }}>
                 {c.value}
-                {c.unit && <span className="text-xs text-slate-500 ml-1 font-normal">{c.unit}</span>}
+                {c.unit && <span className="text-xs text-slate-400 ml-1 font-normal">{c.unit}</span>}
               </p>
               <div className="flex items-center gap-1 mt-2">
-                {isPos?<TrendingDown size={11} className="text-green-400"/>:<TrendingUp size={11} className="text-red-400"/>}
-                <span className={`text-[10px] font-bold ${isPos?'text-green-400':'text-red-400'}`}>{c.change}</span>
-                <span className="text-[9px] text-slate-600">vs last period</span>
+                {isPos
+                  ? <TrendingDown size={11} className="text-green-600"/>
+                  : <TrendingUp size={11} className="text-red-500"/>}
+                <span className={`text-[10px] font-semibold ${isPos?'text-green-700':'text-red-600'}`}>{c.change}</span>
+                <span className="text-[9px] text-slate-400 ml-1">vs last period</span>
               </div>
             </div>
           )
@@ -161,10 +166,9 @@ export default function DefectAnalysis() {
 
       {/* Row 1: Distribution + Stage Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Pie ring */}
-        <div className="glass rounded-2xl p-5 relative overflow-hidden anim-fade-up" style={{ animationDelay:'150ms' }}>
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background:'linear-gradient(90deg,transparent,#ef4444,transparent)' }}/>
-          <h2 className="text-sm font-bold text-white mb-1">Defect Distribution</h2>
+        {/* Donut */}
+        <div className="card p-5 anim-fade-up" style={{ animationDelay:'150ms', borderTop:'3px solid #dc2626' }}>
+          <h2 className="text-sm font-semibold text-slate-800 mb-0.5">Defect Distribution</h2>
           <p className="text-[10px] text-slate-500 mb-3">Current period breakdown</p>
           <DefectRing data={defectDistribution}/>
           <div className="space-y-2 mt-3">
@@ -172,84 +176,80 @@ export default function DefectAnalysis() {
               <div key={d.name}>
                 <div className="flex justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full" style={{ background:d.color }}/>
-                    <span className="text-[10px] text-slate-400">{d.name}</span>
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ background:d.color }}/>
+                    <span className="text-[10px] text-slate-600 font-medium">{d.name}</span>
                   </div>
                   <span className="text-[10px] font-bold" style={{ color:d.color }}>{d.value}%</span>
                 </div>
-                <div className="h-1 rounded-full overflow-hidden" style={{ background:'rgba(30,41,59,0.8)' }}>
-                  <div className="h-full rounded-full transition-all duration-1000"
-                    style={{ width:`${d.value}%`, background:d.color, boxShadow:`0 0 6px ${d.color}` }}/>
+                <div className="progress-track h-1.5">
+                  <div className="progress-fill" style={{ width:`${d.value}%`, background:d.color }}/>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Defects by process stage — stacked bar (replaces Defect Profile) */}
-        <div className="lg:col-span-2 glass rounded-2xl p-5 relative overflow-hidden anim-fade-up" style={{ animationDelay:'200ms' }}>
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background:'linear-gradient(90deg,transparent,#06b6d4,transparent)' }}/>
-          <div className="flex items-center justify-between mb-3">
+        {/* Stacked bar by stage */}
+        <div className="lg:col-span-2 card p-5 anim-fade-up" style={{ animationDelay:'200ms', borderTop:'3px solid #2563eb' }}>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Microscope size={14} className="text-cyan-400"/>Defects by Process Stage
+              <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <Microscope size={14} className="text-blue-600"/>Defects by Process Stage
               </h2>
               <p className="text-[10px] text-slate-500 mt-0.5">Where defects originate across the fab line</p>
             </div>
-            <span className="fab-badge badge-cyan">STAGE ANALYSIS</span>
+            <span className="badge badge-blue">Stage Analysis</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={stageDefects} margin={{ top:5, right:5, left:-20, bottom:0 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="rgba(59,130,246,0.07)" vertical={false}/>
-              <XAxis dataKey="stage" tick={{ fontSize:9, fill:'#475569' }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fontSize:9, fill:'#475569' }} axisLine={false} tickLine={false}/>
-              <Tooltip content={<FabTooltip/>}/>
-              <Bar dataKey="particle"      name="Particle"      stackId="a" fill="#ef4444"  maxBarSize={32}/>
-              <Bar dataKey="pattern"       name="Pattern"       stackId="a" fill="#f59e0b"  maxBarSize={32}/>
-              <Bar dataKey="alignment"     name="Alignment"     stackId="a" fill="#3b82f6"  maxBarSize={32}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
+              <XAxis dataKey="stage" tick={{ fontSize:9, fill:'#94a3b8' }} axisLine={false} tickLine={false}/>
+              <YAxis tick={{ fontSize:9, fill:'#94a3b8' }} axisLine={false} tickLine={false}/>
+              <Tooltip content={<ChartTip/>}/>
+              <Bar dataKey="particle"      name="Particle"      stackId="a" fill="#ef4444" maxBarSize={32}/>
+              <Bar dataKey="pattern"       name="Pattern"       stackId="a" fill="#f59e0b" maxBarSize={32}/>
+              <Bar dataKey="alignment"     name="Alignment"     stackId="a" fill="#3b82f6" maxBarSize={32}/>
               <Bar dataKey="contamination" name="Contamination" stackId="a" fill="#8b5cf6" radius={[4,4,0,0]} maxBarSize={32}/>
             </BarChart>
           </ResponsiveContainer>
-          {/* Legend */}
           <div className="flex flex-wrap gap-3 mt-2">
             {[['Particle','#ef4444'],['Pattern','#f59e0b'],['Alignment','#3b82f6'],['Contamination','#8b5cf6']].map(([l,c]) => (
               <div key={l} className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full" style={{ background:c }}/>
-                <span className="text-[9px] text-slate-500">{l}</span>
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background:c }}/>
+                <span className="text-[9px] text-slate-500 font-medium">{l}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Row 2: Wafer Zone Defect Map + Inspection Escape Rate */}
+      {/* Row 2: Wafer Zone + Inspection Escape */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Wafer zone density */}
-        <div className="glass rounded-2xl p-5 relative overflow-hidden anim-fade-up" style={{ animationDelay:'250ms' }}>
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background:'linear-gradient(90deg,transparent,#8b5cf6,transparent)' }}/>
-          <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-            <Layers size={14} className="text-purple-400"/>Wafer Zone Defect Density
+        <div className="card p-5 anim-fade-up" style={{ animationDelay:'250ms', borderTop:'3px solid #7c3aed' }}>
+          <h2 className="text-sm font-semibold text-slate-800 mb-0.5 flex items-center gap-2">
+            <Layers size={14} className="text-purple-600"/>Wafer Zone Defect Density
           </h2>
           <p className="text-[10px] text-slate-500 mb-4">Defect distribution across wafer regions</p>
           <div className="space-y-3">
             {zoneData.map(z => (
-              <div key={z.zone} className="rounded-xl p-3" style={{ background:'rgba(15,23,42,0.6)', border:'1px solid rgba(59,130,246,0.08)' }}>
+              <div key={z.zone} className="rounded-xl p-3 bg-slate-50 border border-slate-100">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-slate-200">{z.zone}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] text-slate-500">Density:</span>
-                    <span className="text-[10px] font-black" style={{ color: z.density>0.04?'#f87171':z.density>0.02?'#fbbf24':'#4ade80' }}>
-                      {z.density}/cm²
+                  <span className="text-[11px] font-semibold text-slate-700">{z.zone}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-slate-400">Density:</span>
+                    <span className="text-[10px] font-bold" style={{ color:z.density>0.04?'#dc2626':z.density>0.02?'#d97706':'#16a34a' }}>
+                      {z.density}/cmÂ²
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-1 h-2.5 rounded-full overflow-hidden">
-                  <div className="rounded-l-full" style={{ width:`${z.good}%`, background:'linear-gradient(90deg,#1d4ed8,#06b6d4)', boxShadow:'0 0 4px rgba(6,182,212,0.4)' }}/>
-                  <div className="rounded-r-full" style={{ width:`${z.defect}%`, background:'linear-gradient(90deg,#ef4444,#f87171)', boxShadow:'0 0 4px rgba(239,68,68,0.4)' }}/>
+                <div className="flex gap-0.5 h-3 rounded-full overflow-hidden">
+                  <div style={{ width:`${z.good}%`, background:'#2563eb', borderRadius:'99px 0 0 99px' }}/>
+                  <div style={{ width:`${z.defect}%`, background:'#ef4444', borderRadius:'0 99px 99px 0' }}/>
                 </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[9px] text-cyan-400">{z.good}% good</span>
-                  <span className="text-[9px] text-red-400">{z.defect}% defect</span>
+                <div className="flex justify-between mt-1.5">
+                  <span className="text-[9px] text-blue-600 font-medium">{z.good}% good</span>
+                  <span className="text-[9px] text-red-500 font-medium">{z.defect}% defect</span>
                 </div>
               </div>
             ))}
@@ -257,82 +257,80 @@ export default function DefectAnalysis() {
         </div>
 
         {/* Inspection escape rate */}
-        <div className="glass rounded-2xl p-5 relative overflow-hidden anim-fade-up" style={{ animationDelay:'280ms' }}>
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background:'linear-gradient(90deg,transparent,#10b981,transparent)' }}/>
-          <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-            <Target size={14} className="text-green-400"/>Inspection Capture &amp; Escape Rate
+        <div className="card p-5 anim-fade-up" style={{ animationDelay:'280ms', borderTop:'3px solid #16a34a' }}>
+          <h2 className="text-sm font-semibold text-slate-800 mb-0.5 flex items-center gap-2">
+            <Target size={14} className="text-green-600"/>Inspection Capture &amp; Escape Rate
           </h2>
           <p className="text-[10px] text-slate-500 mb-4">Defect detection effectiveness by inspection step</p>
           <div className="space-y-3">
             {inspectionEscape.map(s => (
               <div key={s.step}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] text-slate-300 font-medium">{s.step}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] text-green-400 font-bold">{s.captured}% captured</span>
-                    <span className="text-[9px] text-red-400 font-bold">{s.escaped}% escaped</span>
+                  <span className="text-[11px] text-slate-700 font-medium">{s.step}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] text-green-700 font-semibold">{s.captured}% captured</span>
+                    <span className="text-[9px] text-red-500 font-semibold">{s.escaped}% escaped</span>
                   </div>
                 </div>
-                <div className="flex gap-0.5 h-2 rounded-full overflow-hidden">
-                  <div style={{ width:`${s.captured}%`, background:'linear-gradient(90deg,#10b981,#4ade80)' }}/>
-                  <div style={{ width:`${s.escaped}%`, background:'rgba(239,68,68,0.5)' }}/>
+                <div className="flex gap-0.5 h-2.5 rounded-full overflow-hidden">
+                  <div style={{ width:`${s.captured}%`, background:'#16a34a', borderRadius:'99px 0 0 99px' }}/>
+                  <div style={{ width:`${s.escaped}%`, background:'#fecaca', borderRadius:'0 99px 99px 0' }}/>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-3 flex items-center justify-between" style={{ borderTop:'1px solid rgba(59,130,246,0.1)' }}>
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck size={13} className="text-green-400"/>
-              <span className="text-[10px] text-slate-400">Overall Capture Rate: <span className="font-bold text-green-300">98.4%</span></span>
+          <div className="mt-4 pt-3 flex items-center justify-between border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={14} className="text-green-600"/>
+              <span className="text-[10px] text-slate-600">Overall Capture Rate: <span className="font-bold text-green-700">98.4%</span></span>
             </div>
-            <span className="fab-badge badge-green">EXCELLENT</span>
+            <span className="badge badge-green">Excellent</span>
           </div>
         </div>
       </div>
 
-      {/* Root Cause Analysis (replaces 5-Day Trend) */}
-      <div className="glass rounded-2xl overflow-hidden anim-fade-up" style={{ animationDelay:'300ms' }}>
-        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-          style={{ borderBottom:'1px solid rgba(59,130,246,0.1)' }}>
+      {/* Root Cause Analysis */}
+      <div className="card overflow-hidden anim-fade-up" style={{ animationDelay:'300ms' }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Activity size={14} className="text-amber-400"/>Root Cause Analysis (RCA)
+            <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <Activity size={14} className="text-amber-600"/>Root Cause Analysis (RCA)
             </h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">{rootCauses.length} identified root causes · Click row for mitigation strategy</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{rootCauses.length} identified root causes Â· Click row for mitigation</p>
           </div>
-          <span className="fab-badge badge-amber"><AlertTriangle size={9}/>{rootCauses.filter(r=>r.risk==='High').length} HIGH RISK</span>
+          <span className="badge badge-amber"><AlertTriangle size={9}/>{rootCauses.filter(r=>r.risk==='High').length} High Risk</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full fab-table">
+          <table className="data-table">
             <thead>
-              <tr><th>Root Cause</th><th>Process Step</th><th>Defects</th><th>Risk</th><th>Est. Cost/Month</th><th>Mitigation</th></tr>
+              <tr>
+                <th>Root Cause</th><th>Process Step</th><th>Defects</th>
+                <th>Risk</th><th>Est. Cost/Month</th><th>Mitigation</th>
+              </tr>
             </thead>
             <tbody>
               {rootCauses.map((r, i) => {
                 const rc = RISK_CFG[r.risk]
                 return (
-                  <tr key={i} onClick={() => setActiveRCA(activeRCA===i?null:i)}
-                    className="cursor-pointer">
+                  <tr key={i} onClick={() => setActiveRCA(activeRCA===i?null:i)} className="cursor-pointer">
                     <td>
                       <div className="flex items-center gap-2">
                         <span className="text-base">{r.icon}</span>
-                        <span className="font-semibold text-slate-200 text-[11px]">{r.cause}</span>
+                        <span className="font-semibold text-slate-700 text-[11px]">{r.cause}</span>
                       </div>
                     </td>
-                    <td className="text-slate-400 text-[10px]">{r.process}</td>
-                    <td className="font-bold text-white">{r.defects}</td>
+                    <td className="text-slate-500 text-[10px]">{r.process}</td>
+                    <td className="font-bold text-slate-800">{r.defects}</td>
                     <td>
-                      <span className="fab-badge" style={{ background:rc.bg, color:rc.color, border:`1px solid ${rc.border}` }}>
+                      <span className="badge" style={{ background:rc.bg, color:rc.color, borderColor:rc.border }}>
                         {r.risk}
                       </span>
                     </td>
-                    <td className="font-bold text-red-300">{formatINR(r.cost)}</td>
+                    <td className="font-bold text-red-600">{fmtINR(r.cost)}</td>
                     <td>
-                      {activeRCA===i ? (
-                        <p className="text-[10px] text-cyan-300 max-w-xs">{r.mitigation}</p>
-                      ) : (
-                        <span className="text-[9px] text-slate-600 italic">Click to expand →</span>
-                      )}
+                      {activeRCA===i
+                        ? <p className="text-[10px] text-blue-700 font-medium max-w-xs">{r.mitigation}</p>
+                        : <span className="text-[9px] text-slate-400 italic">Click to expand â†’</span>}
                     </td>
                   </tr>
                 )
@@ -342,38 +340,37 @@ export default function DefectAnalysis() {
         </div>
       </div>
 
-      {/* Defect log table */}
-      <div className="glass rounded-2xl overflow-hidden anim-fade-up" style={{ animationDelay:'350ms' }}>
-        <div className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom:'1px solid rgba(59,130,246,0.1)' }}>
+      {/* Defect log */}
+      <div className="card overflow-hidden anim-fade-up" style={{ animationDelay:'350ms' }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
           <div>
-            <h2 className="text-sm font-bold text-white">Defect Log</h2>
+            <h2 className="text-sm font-semibold text-slate-800">Defect Log</h2>
             <p className="text-[10px] text-slate-500 mt-0.5">{defectTable.length} defect types tracked this period</p>
           </div>
           <div className="flex items-center gap-2">
-            <ShieldCheck size={13} className="text-green-400"/>
-            <span className="text-[10px] text-slate-400">Inspection: <span className="text-green-400 font-bold">98.4%</span></span>
+            <ShieldCheck size={13} className="text-green-600"/>
+            <span className="text-[10px] text-slate-600">Inspection: <span className="font-bold text-green-700">98.4%</span></span>
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full fab-table">
+          <table className="data-table">
             <thead>
               <tr><th>#</th><th>Defect Type</th><th>Count</th><th>Severity</th><th>Location</th><th>Trend</th></tr>
             </thead>
             <tbody>
               {defectTable.map((r, i) => (
                 <tr key={r.id}>
-                  <td className="text-slate-600 font-mono text-[10px]">{String(i+1).padStart(2,'0')}</td>
-                  <td className="font-semibold text-slate-200">{r.type}</td>
-                  <td className="font-bold text-white">{r.count}</td>
+                  <td className="text-slate-400 font-mono text-[10px]">{String(i+1).padStart(2,'0')}</td>
+                  <td className="font-medium text-slate-700">{r.type}</td>
+                  <td className="font-bold text-slate-800">{r.count}</td>
                   <td>
-                    <span className="fab-badge" style={{ background:COLORS[r.severity]+'20', color:COLORS[r.severity], border:`1px solid ${COLORS[r.severity]}40` }}>
+                    <span className="badge" style={{ background:SEV_BG[r.severity], color:SEV_COLORS[r.severity], borderColor:SEV_BORDER[r.severity] }}>
                       {r.severity}
                     </span>
                   </td>
-                  <td className="text-slate-400">{r.location}</td>
+                  <td className="text-slate-500">{r.location}</td>
                   <td>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       {TREND_ICON[r.trend]}
                       <span className="text-[10px] text-slate-500 capitalize">{r.trend}</span>
                     </div>
@@ -387,3 +384,5 @@ export default function DefectAnalysis() {
     </div>
   )
 }
+
+
